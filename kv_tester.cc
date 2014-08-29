@@ -112,8 +112,18 @@ test23_run(void *x)
 			}
 		}
 	}
-	kvc[i]->remove(key1, &version);
-	kvc[i]->remove(key2, &version);
+	int ret = kv_protocol::NOEXIST;
+	while ( ret == kv_protocol::NOEXIST) {
+		ret = kvc[i]->remove(key1, &version);
+	}
+	verify_ret(__LINE__, ret, 0);
+
+	ret = kv_protocol::NOEXIST;
+	while ( ret == kv_protocol::NOEXIST) {
+		ret = kvc[i]->remove(key2, &version);
+	}
+	verify_ret(__LINE__, ret, 0);
+
 	return 0;
 }
 
