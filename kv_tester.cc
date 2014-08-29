@@ -94,7 +94,7 @@ test23_run(void *x)
 	std::string buf;
 	std::string key;
 
-	for (int j = 0; j < NREPEAT; j++) {
+	for (int j = 0; j < 2*NREPEAT; j++) {
 		sprintf(tmp, "%d", (int) random() % 1000);
 		if ((j % 2) == 0)
 			key = key1;
@@ -104,7 +104,7 @@ test23_run(void *x)
 		verify_ret(__LINE__, kvc[i]->put(key, tmp), 0);
 
 		if (kvc[i]->get(key, buf, &version) == 0) {
-			if (version > (NTHREADS * (NREPEAT / 2 + 1))|| version <= 0) {
+			if (version > (NTHREADS * (NREPEAT + 1))|| version <= 0) {
 				//since each thread issues NREPEAT/2 puts and 1 remove to either key1 or key2
 				//key1 or key2 cannot have a version number greater than NTHREADS * NREPEAT/2
 				printf("\t line-%d ERROR: wrong version number %d\n", __LINE__, version);
@@ -112,8 +112,8 @@ test23_run(void *x)
 			}
 		}
 	}
-	verify_ret(__LINE__, kvc[i]->remove(key1, &version), 0);
-	verify_ret(__LINE__, kvc[i]->remove(key2, &version), 0);
+	kvc[i]->remove(key1, &version);
+	kvc[i]->remove(key2, &version);
 	return 0;
 }
 
@@ -136,12 +136,12 @@ void test23()
 
 	verify_ret(__LINE__, kvc[0]->put(key1, "test23done"), 0);
 	verify_ret(__LINE__, kvc[0]->get(key1, buf, &ver), 0);
-	verify_version(__LINE__, ver, NTHREADS*(NREPEAT/2+1) + 1);
+	verify_version(__LINE__, ver, NTHREADS*(NREPEAT+1) + 1);
 	verify_value(__LINE__, buf, "test23done");
 
 	verify_ret(__LINE__, kvc[0]->put(key2, "test23done"), 0);
 	verify_ret(__LINE__, kvc[0]->get(key2, buf, &ver), 0);
-	verify_version(__LINE__, ver, NTHREADS*(NREPEAT/2 + 1)+1);
+	verify_version(__LINE__, ver, NTHREADS*(NREPEAT + 1)+1);
 	verify_value(__LINE__, buf, "test23done");
 
 }
