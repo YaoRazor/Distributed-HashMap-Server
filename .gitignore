@@ -1,0 +1,7 @@
+**/*.o
+**/*.d
+kv_demo
+kv_server
+kv_tester
+rpc/librpc.a
+rpc/rpctest
