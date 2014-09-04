@@ -27,16 +27,19 @@ lab5: yfs_client extent_server lock_server test-lab-3-b test-lab-3-c
 lab6: lock_server rsm_tester
 lab7: lock_tester lock_server rsm_tester
 
-hfiles1=rpc/fifo.h rpc/connection.h rpc/rpc.h rpc/marshall.h rpc/method_thread.h\
+#the hfiles* are for make l1 etc.
+common_src := .gitignore GNUmakefile  
+hfilesrpc=rpc/fifo.h rpc/connection.h rpc/rpc.h rpc/marshall.h rpc/method_thread.h\
 	rpc/thr_pool.h rpc/pollmgr.h rpc/jsl_log.h rpc/slock.h\
-	lang/verify.h lang/algorithm.h kv_server.h kv_client.h kv_protocol.h
+	lang/verify.h lang/algorithm.h 
+hfiles1= kv_server.h kv_client.h kv_protocol.h
 hfiles2=yfs_client.h extent_client.h extent_protocol.h extent_server.h
 hfiles3=lock_client_cache.h lock_server_cache.h handle.h tprintf.h
 hfiles4=log.h rsm.h rsm_protocol.h config.h paxos.h paxos_protocol.h rsm_state_transfer.h rsmtest_client.h tprintf.h
 hfiles5=rsm_state_transfer.h rsm_client.h
 rsm_files = rsm.cc paxos.cc config.cc log.cc handle.cc
 
-rpclib=rpc/rpc.cc rpc/connection.cc rpc/pollmgr.cc rpc/thr_pool.cc rpc/jsl_log.cc 
+rpclib=rpc/rpc.cc rpc/connection.cc rpc/pollmgr.cc rpc/thr_pool.cc rpc/jsl_log.cc rpc/rpctest.cc
 rpc/librpc.a: $(patsubst %.cc,%.o,$(rpclib))
 	rm -f $@
 	ar cq $@ $^
@@ -85,16 +88,10 @@ yfs_client : $(patsubst %.cc,%.o,$(yfs_client)) rpc/librpc.a
 kv_server=kv_server.cc kv_smain.cc 
 kv_server : $(patsubst %.cc,%.o,$(kv_server)) rpc/librpc.a
 
-test-lab-3-b=test-lab-3-b.c
-test-lab-3-b:  $(patsubst %.c,%.o,$(test_lab_4-b)) rpc/librpc.a
-
-test-lab-3-c=test-lab-3-c.c
-test-lab-4-c:  $(patsubst %.c,%.o,$(test_lab_4-c)) rpc/librpc.a
-
 rsm_tester=rsm_tester.cc rsmtest_client.cc
 rsm_tester:  $(patsubst %.cc,%.o,$(rsm_tester)) rpc/librpc.a
 
-%.o: %.cc $(hfiles)
+%.o: %.cc 
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 -include mklab.inc
@@ -102,7 +99,7 @@ rsm_tester:  $(patsubst %.cc,%.o,$(rsm_tester)) rpc/librpc.a
 -include *.d
 -include rpc/*.d
 
-clean_files=rpc/rpctest rpc/*.o rpc/*.d rpc/librpc.a *.o *.d yfs_client extent_server lock_server lock_tester lock_demo rpctest test-lab-3-b test-lab-3-c rsm_tester
+clean_files=rpc/rpctest rpc/*.o rpc/*.d rpc/librpc.a *.o *.d kv_server kv_client kv_demo kv_tester rsm_tester
 .PHONY: clean handin
 clean: 
 	rm $(clean_files) -rf 

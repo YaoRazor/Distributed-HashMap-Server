@@ -112,8 +112,8 @@ test23_run(void *x)
 			}
 		}
 	}
-	ret = kvc[i]->remove(key1, &version);
-	ret = kvc[i]->remove(key2, &version);
+	kvc[i]->remove(key1, &version);
+	kvc[i]->remove(key2, &version);
 
 	return 0;
 }
@@ -157,9 +157,9 @@ main(int argc, char *argv[])
 	setvbuf(stderr, NULL, _IONBF, 0);
 	srandom(getpid());
 
-	
+
 	//uncomment the following line to print a lot of debug messages
-	//jsl_set_debug(JSL_DBG_4); 
+	//jsl_set_debug(JSL_DBG_4);
 
 	if(argc < 2) {
 		fprintf(stderr, "Usage: %s [host:]port [test]\n", argv[0]);
@@ -173,7 +173,7 @@ main(int argc, char *argv[])
 			exit(1);
 		}
 	}
-	
+
 	for (int i = 0; i < NTHREADS; i++)  {
 		kvc[i] = new kv_client(argv[1]);
 		printf("created RPC client %d\n", i);
@@ -199,7 +199,7 @@ main(int argc, char *argv[])
 		sprintf(tmp, "%ld", random());
 		key2 = std::string(tmp);
 
-		printf("---test2: %d RPC clients issuing concurrent put/get requests (using keys %s %s)...\n", 
+		printf("---test2: %d RPC clients issuing concurrent put/get requests (using keys %s %s)...\n",
 				NTHREADS, key1.c_str(), key2.c_str());
 		test23();
 	}
@@ -212,7 +212,7 @@ main(int argc, char *argv[])
 		sprintf(tmp, "%ld", random());
 		key2 = std::string(tmp);
 
-		printf("---test3: %d threads issuing concurrent requests from same RPC client (using keys %s %s)...\n", 
+		printf("---test3: %d threads issuing concurrent requests from same RPC client (using keys %s %s)...\n",
 				NTHREADS, key1.c_str(), key2.c_str());
 		test23();
 	}
