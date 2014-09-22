@@ -79,6 +79,7 @@
 const rpcc::TO rpcc::to_max = { 120000 };
 const rpcc::TO rpcc::to_min = { 1000 };
 
+
 rpcc::caller::caller(unsigned int xxid, unmarshall *xun)
 : xid(xxid), un(xun), done(false)
 {
@@ -664,8 +665,64 @@ rpcs::checkduplicate_and_update(unsigned int clt_nonce, unsigned int xid,
 {
 	ScopedLock rwl(&reply_window_m_);
 
-        // You fill this in for Lab 1.
+	pthread_t self_id = pthread_self();
+	//printf("self_id = %lu\n", self_id);
+//	printf("clt_nonce=%u, xid=%u, xid_rep=%u,reply_id_window_[%u] = %u",
+//			clt_nonce, xid, xid_rep, clt_nonce, reply_id_window_[clt_nonce]);
+
+
+	if(xid <= reply_id_window_[clt_nonce]) {
+		//printf("return FORGOTTEN\n ");
+
+		return FORGOTTEN;
+	}
+
+	std::list<reply_t>::iterator it;
+
+	if(xid_rep > reply_id_window_[clt_nonce]) {
+
+		for (it = reply_window_[clt_nonce].begin();it != reply_window_[clt_nonce].end(); ++it) {
+
+							if ((*it).xid <= xid_rep) {
+								free((*it).buf);
+								it = reply_window_[clt_nonce].erase(it);
+								--it;
+							}
+
+			}
+		reply_id_window_[clt_nonce] = xid_rep;
+	}
+
+	for (it = reply_window_[clt_nonce].begin();
+			it != reply_window_[clt_nonce].end(); ++it) {
+
+		if ((*it).xid == xid) {
+
+			if ((*it).cb_present) {
+				*b = ((*it).buf);
+				*sz = ((*it).sz);
+//				printf("buf = %p\n", (*it).buf);
+//				printf("sz=%d\n", (*it).sz);
+//				printf("return DONE\n");
+		        return DONE;
+			} else {
+				//printf("return INPROGRESS\n");
+				return INPROGRESS;
+			}
+		}
+	}
+
+	//if(stat == NEW) {
+
+		reply_t temp(xid);
+		reply_window_[clt_nonce].push_back(temp);
+		        // You fill this in for Lab 1.
+		//return NEW;
+	//}
+
+	//printf("return NEW\n");
 	return NEW;
+
 }
 
 // rpcs::dispatch calls add_reply when it is sending a reply to an RPC,
@@ -679,6 +736,26 @@ rpcs::add_reply(unsigned int clt_nonce, unsigned int xid,
 {
 	ScopedLock rwl(&reply_window_m_);
         // You fill this in for Lab 1.
+
+
+	std::list<reply_t>::iterator it;
+
+	//VERIFY(reply_window_[clt_nonce].find())
+
+	for (it = reply_window_[clt_nonce].begin();
+			it != reply_window_[clt_nonce].end(); ++it) {
+		if ((*it).xid == xid) {
+
+			(*it).cb_present = true;
+			(*it).buf = b;
+			(*it).sz = sz;
+			return;
+
+		}
+	}
+
+	//printf("Failure\n");
+
 }
 
 void
