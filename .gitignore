@@ -3,5 +3,6 @@
 kv_demo
 kv_server
 kv_tester
+rsm_tester
 rpc/librpc.a
 rpc/rpctest
