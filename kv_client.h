@@ -6,6 +6,7 @@
 #include "kv_protocol.h"
 #include "rpc.h"
 
+
 class kv_client {
  private:
   rpcc *cl;

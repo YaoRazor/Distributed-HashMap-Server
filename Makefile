@@ -1,5 +1,5 @@
-LAB=1
-SOL=1
+LAB=2
+SOL=0
 RPC=./rpc
 LAB2GE=$(shell expr $(LAB) \>\= 2)
 LAB3GE=$(shell expr $(LAB) \>\= 3)
