@@ -1,4 +1,4 @@
-LAB=2
+LAB=3
 SOL=0
 RPC=./rpc
 LAB2GE=$(shell expr $(LAB) \>\= 2)
@@ -24,7 +24,7 @@ hfilesrpc=rpc/fifo.h rpc/connection.h rpc/rpc.h rpc/marshall.h rpc/method_thread
 	rpc/thr_pool.h rpc/pollmgr.h rpc/jsl_log.h rpc/slock.h\
 	lang/verify.h lang/algorithm.h 
 hfiles1= kv_server.h kv_client.h kv_protocol.h
-hfilesrsm=handle.h tprintf.h paxos.h paxos_protocol.h rsm_state_transfer.h rsmtest_client.h rsm_client.h
+hfilesrsm=handle.h tprintf.h paxos.h paxos_protocol.h rsm_state_transfer.h rsmtest_client.h rsm_client.h log.h rsm.h rsm_protocol.h config.h
 rsm_files = rsm.cc paxos.cc config.cc log.cc handle.cc
 
 rpclib=rpc/rpc.cc rpc/connection.cc rpc/pollmgr.cc rpc/thr_pool.cc rpc/jsl_log.cc rpc/rpctest.cc

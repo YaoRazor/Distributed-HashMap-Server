@@ -10,19 +10,18 @@
 
 kv_client::kv_client(std::string dst)
 {
-	sockaddr_in dstsock;
-	make_sockaddr(dst.c_str(), &dstsock);
-	cl = new rpcc(dstsock);
-	if (cl->bind() != 0) {
-		printf("kv_client: bind failed\n");
-	}
+	cl = new rsm_client(dst);
 }
 
 int
 kv_client::get(std::string key, std::string &buf, int *version)
 {
 	kv_protocol::versioned_val val;
-	int ret = cl->call(kv_protocol::get, key, val);
+	int ret = -1;
+	while (ret < 0) {
+		ret = cl->call(kv_protocol::get, key, val);
+		if (ret < 0) printf("Yumm! primary failure in get\n"); 
+	}
 	buf = val.buf;
 	if (version)
 		*version = val.version;
@@ -33,7 +32,11 @@ int
 kv_client::put(std::string key, const std::string & buf, int *version)
 {
   int new_version; 
-  int ret = cl->call(kv_protocol::put, key, buf, new_version);
+  int ret = -1;
+  while (ret < 0) {
+  	ret = cl->call(kv_protocol::put, key, buf, new_version);
+	if (ret < 0) printf("Yumm! primary failure in put\n"); 
+  }
   if (version)
 	  *version = new_version;
   return ret;
@@ -43,7 +46,11 @@ int
 kv_client::remove(std::string key, int *version)
 {
   int new_version;
-  int ret = cl->call(kv_protocol::remove, key, new_version);
+  int ret = -1;
+  while (ret < 0) {
+  	ret = cl->call(kv_protocol::remove, key, new_version);
+	if (ret < 0) printf("Yumm! primary failure in remove\n"); 
+  }
   if (version)
 	  *version = new_version;
   return ret;

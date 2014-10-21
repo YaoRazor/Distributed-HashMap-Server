@@ -26,8 +26,14 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	//In Lab2, we disable your kv server and focus on Paxos implementation.
+	//In Lab 3, we will make the kv server use your RSM layer.
 	rsm rsm(argv[1], argv[2]);
+	kv_server kvs;
+	rsm.set_state_transfer((rsm_state_transfer *)&kvs);
+	rsm.reg(kv_protocol::put, &kvs, &kv_server::put);
+	rsm.reg(kv_protocol::get, &kvs, &kv_server::get);
+	rsm.reg(kv_protocol::remove, &kvs, &kv_server::remove);
+	rsm.reg(kv_protocol::stat, &kvs, &kv_server::stat);
 	while(1)
 		sleep(1000);
 }

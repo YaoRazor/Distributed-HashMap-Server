@@ -55,3 +55,20 @@ kv_server::stat(int x, std::string &msg)
 	msg = "Server says: I am kicking";	
 	return kv_protocol::OK;
 }
+
+std::string
+kv_server::marshal_state()
+{
+	//Lab3: You fill this function to marshal the state of the kv_server
+	//Hint: you may want to use ostringstream to marshal your state
+	std::ostringstream ost;
+	return ost.str();
+}
+
+void
+kv_server::unmarshal_state(std::string state)
+{
+	//Lab3: You fill this function to unmarshal the transferred state into kv_server
+	//Hint: use istringstream to extract stuff out of the state string
+  	std::istringstream ist(state);
+}

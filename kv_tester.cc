@@ -104,12 +104,6 @@ test23_run(void *x)
 		verify_ret(__LINE__, kvc[i]->put(key, tmp), 0);
 
 		if (kvc[i]->get(key, buf, &version) == 0) {
-			if (version > (NTHREADS * (NREPEAT + 1))|| version <= 0) {
-				//since each thread issues NREPEAT/2 puts and 1 remove to either key1 or key2
-				//key1 or key2 cannot have a version number greater than NTHREADS * NREPEAT/2
-				printf("\t line-%d ERROR: wrong version number %d\n", __LINE__, version);
-				exit(1);
-			}
 		}
 	}
 	kvc[i]->remove(key1, &version);

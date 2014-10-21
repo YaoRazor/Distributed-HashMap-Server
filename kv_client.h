@@ -6,10 +6,11 @@
 #include "kv_protocol.h"
 #include "rpc.h"
 
+#include "rsm_client.h"
 
 class kv_client {
  private:
-  rpcc *cl;
+  rsm_client *cl; 
 
  public:
   kv_client(std::string dst);
