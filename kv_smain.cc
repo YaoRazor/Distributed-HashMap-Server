@@ -26,6 +26,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
+//<<<<<<< HEAD
 	//In Lab 3, we will make the kv server use your RSM layer.
 	rsm rsm(argv[1], argv[2]);
 	kv_server kvs;
@@ -34,6 +35,25 @@ main(int argc, char *argv[])
 	rsm.reg(kv_protocol::get, &kvs, &kv_server::get);
 	rsm.reg(kv_protocol::remove, &kvs, &kv_server::remove);
 	rsm.reg(kv_protocol::stat, &kvs, &kv_server::stat);
+//=======
+//<<<<<<< HEAD
+	//In Lab2, we disable your kv server and focus on Paxos implementation.
+//	rsm rsm(argv[1], argv[2]);
+//=======
+
+//#ifndef RSM
+//	kv_server kvs;
+//	rpcs server(atoi(argv[1]));
+//	server.reg(kv_protocol::stat, &kvs, &kv_server::stat);
+//	server.reg(kv_protocol::get, &kvs, &kv_server::get);
+//	server.reg(kv_protocol::put, &kvs, &kv_server::put);
+//	server.reg(kv_protocol::remove, &kvs, &kv_server::remove);
+
+//#endif
+
+
+//>>>>>>> lab1
+//>>>>>>> lab2
 	while(1)
 		sleep(1000);
 }
