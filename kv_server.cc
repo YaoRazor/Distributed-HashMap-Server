@@ -128,7 +128,20 @@ kv_server::marshal_state()
 {
 	//Lab3: You fill this function to marshal the state of the kv_server
 	//Hint: you may want to use ostringstream to marshal your state
+
+	 // lock any needed mutexes
+	ScopedLock ml(&map_locker);
 	std::ostringstream ost;
+	ost << server_map.size() << " ";
+	//for each (key,val) pair stored on this server {
+	for (auto iter = server_map.begin(); iter != server_map.end(); iter++) {
+       ost << iter->first << " ";
+	   ost << iter->second.version << " ";
+	   ost << iter->second.buf << " ";
+	   ost << iter->second.delete_flag << " ";
+	}
+	   
+  // unlock any mutexes
 	return ost.str();
 }
 
@@ -137,5 +150,22 @@ kv_server::unmarshal_state(std::string state)
 {
 	//Lab3: You fill this function to unmarshal the transferred state into kv_server
 	//Hint: use istringstream to extract stuff out of the state string
-  	std::istringstream ist(state);
+	 // lock any needed mutexes
+  ScopedLock ml(&map_locker);
+  std::istringstream ist(state);
+  server_map.clear();
+  string key;
+  versioned_val val;
+
+  int kv_num = 0;
+  ist >> kv_num;
+  for (int i = 0; i < kv_num; i++) {
+	  ist >> key;
+	  ist >> val.version;
+	  ist >> val.buf;
+	  ist >> val.delete_flag;
+	  server_map.insert(pair<string,versioned_val>(key,val));
+  }
+  
+  // unlock any mutexes
 }
