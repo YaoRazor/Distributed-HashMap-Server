@@ -348,9 +348,39 @@ rsm::execute(int procno, std::string req, std::string &r)
 rsm_client_protocol::status
 rsm::client_invoke(int procno, std::string req, std::string &r)
 {
-	int ret = rsm_client_protocol::OK;
+	// VERIFY (pthread_mutex_unlock(&rsm_mutex) == 0);
+	ScopedLock ml(&invoke_mutex);
+	//int ret = rsm_client_protocol::OK;
+	int dummy = 0;
+	if(inviewchange == true) {
+        return rsm_client_protocol::BUSY;
+	}
+	if(!amiprimary()) {
+		return rsm_client_protocol::NOTPRIMARY;
+	}
+
+    last_myvs.vid = myvs.vid;
+    last_myvs.seqno = myvs.seqno;
+
+    myvs.seqno++;
+
+    for (auto iter = backups.begin(); iter != backups.end(); iter++) {
+		handle h(*iter);
+		rpcc *cl = h.safebind();
+		int return_value = rsm_protocol::OK;
+		if (cl) {
+			return_value = cl->call(rsm_protocol::invoke, procno, myvs, req, dummy, rpcc::to(1000));
+		}
+
+		if ( !cl || return_value != rsm_protocol::OK) {
+	    
+		return rsm_client_protocol::BUSY;
+		}
+	}
+
+	execute(procno, req, r);	
 	// You fill this in for Lab 3
-	return ret;
+	return rsm_client_protocol::OK;;
 }
 
 // 
@@ -362,8 +392,32 @@ rsm::client_invoke(int procno, std::string req, std::string &r)
 rsm_protocol::status
 rsm::invoke(int proc, viewstamp vs, std::string req, int &dummy)
 {
+	std::string r;
 	rsm_protocol::status ret = rsm_protocol::OK;
+
+    // Check view is stable
+	if(inviewchange) {
+        return rsm_protocol::ERR;
+	}
+
+	// check itself should be a slave
+	if(amiprimary()) {
+		return rsm_protocol::ERR;
+	}
+
+	//Check if it is the right viewstamp
+	if((vs.vid != last_myvs.vid && vs.seqno != 1)
+	    || (vs.vid == last_myvs.vid && vs.seqno != last_myvs.seqno +1) ) {
+
+		return rsm_protocol::ERR;
+	}
+
+	last_myvs.vid = vs.vid;
+	last_myvs.seqno = vs.seqno;
+
+	execute(proc, req, r);
 	// You fill this in for Lab 3
+
 	return ret;
 }
 
