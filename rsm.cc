@@ -359,12 +359,18 @@ rsm::client_invoke(int procno, std::string req, std::string &r)
 		return rsm_client_protocol::NOTPRIMARY;
 	}
 
-    last_myvs.vid = myvs.vid;
-    last_myvs.seqno = myvs.seqno;
 
-    myvs.seqno++;
+    last_myvs = myvs;
 
-    for (auto iter = backups.begin(); iter != backups.end(); iter++) {
+
+
+    std::vector<std::string> current_view = cfg->get_view(vid_commit);
+
+    for (auto iter = current_view.begin(); iter != current_view.end(); iter++) {
+    	if(*iter == primary) {
+    		continue;
+    	}
+
 		handle h(*iter);
 		rpcc *cl = h.safebind();
 		int return_value = rsm_protocol::OK;
@@ -377,6 +383,8 @@ rsm::client_invoke(int procno, std::string req, std::string &r)
 		return rsm_client_protocol::BUSY;
 		}
 	}
+
+    myvs.seqno++;
 
 	execute(procno, req, r);	
 	// You fill this in for Lab 3
@@ -406,11 +414,18 @@ rsm::invoke(int proc, viewstamp vs, std::string req, int &dummy)
 	}
 
 	//Check if it is the right viewstamp
+	//Check way 1
 	if((vs.vid != last_myvs.vid && vs.seqno != 1)
 	    || (vs.vid == last_myvs.vid && vs.seqno != last_myvs.seqno +1) ) {
 
 		return rsm_protocol::ERR;
 	}
+
+    //Check way 2
+//	 if(vs.vid != last_myvs.vid || vs.seqno != last_myvs.seqno +1) {
+//
+//	 	return rsm_protocol::ERR;
+//	 }
 
 	last_myvs.vid = vs.vid;
 	last_myvs.seqno = vs.seqno;
