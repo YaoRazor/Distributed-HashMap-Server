@@ -210,6 +210,8 @@ rsm::sync_with_backups()
 	// You fill this in for Lab 3
 
 	std::vector<std::string> current_view = cfg->get_view(vid_insync);
+
+	backups.clear();
 	for (auto iter = current_view.begin(); iter != current_view.end(); iter++) {
 		if(*iter == primary) {
 			continue;
@@ -351,6 +353,7 @@ rsm::commit_change(unsigned vid)
 {
 	ScopedLock ml(&rsm_mutex);
 	commit_change_wo(vid);
+	breakpoint2();
 }
 
 void 
@@ -406,11 +409,12 @@ rsm::client_invoke(int procno, std::string req, std::string &r)
 	}
 
 
-    last_myvs = myvs;
+
 
 
 
     std::vector<std::string> current_view = cfg->get_view(vid_commit);
+    int j = 0;
 
     for (auto iter = current_view.begin(); iter != current_view.end(); iter++) {
     	if(*iter == primary) {
@@ -422,13 +426,23 @@ rsm::client_invoke(int procno, std::string req, std::string &r)
 		int return_value = rsm_protocol::OK;
 		if (cl) {
 			return_value = cl->call(rsm_protocol::invoke, procno, myvs, req, dummy, rpcc::to(1000));
+			j++;
 		}
+
+
+
 
 		if ( !cl || return_value != rsm_protocol::OK) {
 	    
 		return rsm_client_protocol::BUSY;
 		}
+
+		if(j==1) {
+				breakpoint1();
+				partition1();
+			}
 	}
+    last_myvs = myvs;
 
     myvs.seqno++;
 
@@ -446,6 +460,7 @@ rsm::client_invoke(int procno, std::string req, std::string &r)
 rsm_protocol::status
 rsm::invoke(int proc, viewstamp vs, std::string req, int &dummy)
 {
+	ScopedLock ml(&invoke_mutex);
 	std::string r;
 	rsm_protocol::status ret = rsm_protocol::OK;
 
@@ -459,13 +474,22 @@ rsm::invoke(int proc, viewstamp vs, std::string req, int &dummy)
 		return rsm_protocol::ERR;
 	}
 
+	if(vs == last_myvs) {
+		return rsm_protocol::OK;
+	}
+
 	//Check if it is the right viewstamp
 	//Check way 1
-	if((vs.vid != last_myvs.vid && vs.seqno != 1)
-	    || (vs.vid == last_myvs.vid && vs.seqno != last_myvs.seqno +1) ) {
+//	if((vs.vid != last_myvs.vid && vs.seqno != 1)
+//	    || (vs.vid == last_myvs.vid && vs.seqno != last_myvs.seqno +1) ) {
+//
+//		return rsm_protocol::ERR;
+//	}
 
+	if(vs != myvs) {
 		return rsm_protocol::ERR;
 	}
+
 
     //Check way 2
 //	 if(vs.vid != last_myvs.vid || vs.seqno != last_myvs.seqno +1) {
@@ -476,10 +500,11 @@ rsm::invoke(int proc, viewstamp vs, std::string req, int &dummy)
 	last_myvs.vid = vs.vid;
 	last_myvs.seqno = vs.seqno;
 
-	myvs = last_myvs;
+	//myvs = last_myvs;
 	myvs.seqno++;
 
 	execute(proc, req, r);
+	breakpoint1();
 	// You fill this in for Lab 3
 
 	return ret;

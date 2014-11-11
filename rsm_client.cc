@@ -28,6 +28,18 @@ void
 rsm_client::primary_failure()
 {
 	// You fill this in for Lab 3
+//	std::string new_primary;
+//	assert(known_mems.back()!=primary);
+//	primary = known_mems.back();
+
+	for (auto iter = known_mems.begin();iter!=known_mems.end();iter++) {
+		if(*iter!=primary) {
+			primary = *iter;
+			break;
+		}
+	}
+	//known_mems.pop_back();
+
 }
 
 rsm_protocol::status
