@@ -221,7 +221,7 @@ rsm::sync_with_backups()
 	}
   
     // Use while loop can avoid serveral potential problems in conditional variable
-    while (backups.size() > 0) {
+    while (backups.size() > 0 && vid_insync == vid_commit) {
     	pthread_cond_wait(&recovery_cond, &rsm_mutex);
     }
 
@@ -548,6 +548,16 @@ rsm::transferdonereq(std::string m, unsigned vid, int &)
 	// - Wake up recovery thread if all backups are synchronized
 
     if(!insync || vid != vid_insync) {
+    	 for (auto iter = backups.begin(); iter != backups.end(); iter++) {
+    	      	if(*iter == m) {
+    	      		backups.erase(iter);
+    	      		break;
+    	      	}
+    	    }
+    	 if(backups.size() == 0 || vid_commit !=vid_insync) {
+    		   pthread_cond_signal(&recovery_cond);
+    	    }
+
     	return rsm_protocol::BUSY;
     }
 
@@ -557,7 +567,7 @@ rsm::transferdonereq(std::string m, unsigned vid, int &)
       		break;
       	}
     }
-    if(backups.size() == 0) {
+    if(backups.size() == 0 || vid_commit !=vid_insync) {
 	   pthread_cond_signal(&recovery_cond);
     }
 
