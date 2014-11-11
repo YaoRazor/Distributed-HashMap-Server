@@ -437,10 +437,10 @@ rsm::client_invoke(int procno, std::string req, std::string &r)
 		return rsm_client_protocol::BUSY;
 		}
 
-		if(j==1) {
+		//if(j==1) {
 				breakpoint1();
 				partition1();
-			}
+		//	}
 	}
     last_myvs = myvs;
 
