@@ -460,7 +460,7 @@ rsm::client_invoke(int procno, std::string req, std::string &r)
 rsm_protocol::status
 rsm::invoke(int proc, viewstamp vs, std::string req, int &dummy)
 {
-	ScopedLock ml(&invoke_mutex);
+	//ScopedLock ml(&invoke_mutex);
 	std::string r;
 	rsm_protocol::status ret = rsm_protocol::OK;
 
